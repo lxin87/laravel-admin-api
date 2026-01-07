@@ -38,4 +38,19 @@ class Admin extends Authenticatable
         // 关联模型, 中间表名, 本模型在中间表的外键, 目标模型在中间表的外键
         return $this->belongsToMany(SysRole::class, 'sys_admin_roles', 'admin_id', 'role_id');
     }
+
+    public function getPermissions()
+    {
+        // 利用 Laravel 的关联关系和集合操作，快速提取所有角色的菜单权限码
+        // 假设你的 Admin 模型已经关联了 roles，且 Role 模型关联了 menus
+        return $this->roles()->with('menus')->get()
+            ->pluck('menus')
+            ->flatten()
+            ->where('status', 0)
+            ->pluck('perm_code')
+            ->filter()
+            ->unique()
+            ->values()
+            ->toArray();
+    }
 }
