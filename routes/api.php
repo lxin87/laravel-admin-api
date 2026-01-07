@@ -2,17 +2,18 @@
 
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\MenuController;
+use App\Http\Controllers\OperationLogController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RoleController;
 use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\AuthController;
 
-Route::post('/login', [AuthController::class, 'login']);
+Route::post('/login', [AuthController::class, 'login'])->middleware('opt.log');
 //TODO::优化权限层级问题，目前只是把一些跟CURD无关的权限放在一个公共权限组下，并且设置为隐藏。
 //但很多时候，一个按钮权限下，可能有多个接口权限，如果都仍到公共权限组下，时间久了可能就分不清是哪里的权限了。后续优化下
 
-Route::middleware(['auth:sanctum','auth.check'])->group(function () {
+Route::middleware(['auth:sanctum','auth.check','opt.log'])->group(function () {
     Route::get('auth/info', [AuthController::class, 'getInfo'])->name('sys:auth:info');
     Route::post('/logout', [AuthController::class, 'logout'])->name('sys:logout');
 
@@ -34,4 +35,7 @@ Route::middleware(['auth:sanctum','auth.check'])->group(function () {
 
     //修改个人资料
     Route::put('profile/update', [ProfileController::class, 'update'])->name('sys:profile:update');
+
+    //操作日志
+    Route::get('system/logs', [OperationLogController::class, 'index'])->name('sys:log:index');
 });
